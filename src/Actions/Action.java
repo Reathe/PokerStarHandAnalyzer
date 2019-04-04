@@ -5,6 +5,11 @@ public class Action {
     private ActionName action;
     private int ammount;
 
+    public Action(ActionName action, int ammount) {
+        setAction(action);
+        setAmmount(ammount);
+    }
+
     /**
      * @return the action
      */
@@ -16,7 +21,7 @@ public class Action {
      * @return the ammount
      */
     public int getAmmount() {
-        if (getAction().equals(ActionName.Raise) || getAction().equals(ActionName.Raise))
+        if (getAction().equals(ActionName.Blinds) || getAction().equals(ActionName.Call) || getAction().equals(ActionName.Raise))
             return ammount;
         else
             throw new IllegalAccessError(getAction().toString() + " n'a pas de valeur.");
@@ -26,7 +31,11 @@ public class Action {
      * @param ammount the ammount to set
      */
     public void setAmmount(int ammount) {
-        this.ammount = ammount;
+        if (getAction().equals(ActionName.Blinds) || getAction().equals(ActionName.Raise))
+            this.ammount = ammount;
+        else
+            throw new IllegalAccessError(getAction().toString() + " n'a pas de valeur.");
+
     }
 
     /**
@@ -35,5 +44,5 @@ public class Action {
     public void setAction(ActionName action) {
         this.action = action;
     }
-    
+
 }
