@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ReadFile",
+            "request": "launch",
+            "mainClass": "PokerSHand.ReadFile",
+            "projectName": "Aleatoire"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ReadFromFileUsingScanner",
+            "request": "launch",
+            "mainClass": "PokerSHand.ReadFromFileUsingScanner",
+            "projectName": "Aleatoire"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - App",
             "request": "launch",
             "mainClass": "app.App",

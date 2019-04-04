@@ -1,7 +1,6 @@
 package paquet;
 
 import java.util.ArrayList;
-
 import carte.Carte;
 import carte.Enseigne;
 import carte.Valeur;

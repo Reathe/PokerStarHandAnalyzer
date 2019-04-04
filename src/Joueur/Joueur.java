@@ -38,7 +38,7 @@ public class Joueur {
 
     public String toString() {
         String s = "";
-        s += "Joueur[nom=" + getNom() + "Stack = " + getStack()+ "]";
+        s += "Joueur[nom=" + getNom() + ",Stack = " + getStack()+ "]";
         return s;
     }
 
