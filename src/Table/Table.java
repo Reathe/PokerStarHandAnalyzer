@@ -83,9 +83,12 @@ public class Table {
     @Override
     public String toString() {
         String s = "Table[" + getNom() + ",Bouton seat #" + getButton() + "\nJoueurs:\n";
+        int i = 1;
         for (Joueur j : seats) {
-            if (j != null)
-                s += "-" + j.toString() + "\n";
+            if (j != null) {
+                s += "-" + j.toString() + " seat #" + i + "\n";
+            }
+            i++;
         }
         s += "]";
         return s;
