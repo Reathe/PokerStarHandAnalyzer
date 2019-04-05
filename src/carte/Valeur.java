@@ -5,7 +5,7 @@ public class Valeur {
     public static final int K = 13;
     public static final int Q = 12;
     public static final int J = 11;
-
+    public static final int T = 10;
     private int valeur;
 
     public Valeur(int valeur) {
@@ -26,7 +26,7 @@ public class Valeur {
     /**
      * @param valeur the valeur to set
      */
-    public void setValeur(int valeur) {
+    private void setValeur(int valeur) {
         if (valeur <= A && valeur > 1)
             this.valeur = valeur;
         else
@@ -36,7 +36,7 @@ public class Valeur {
     /**
      * @param valeur the valeur to set
      */
-    public void setValeur(String valeur) {
+    private void setValeur(String valeur) {
         try {
             setValeur(Integer.parseInt(valeur));
         } catch (NumberFormatException e) {
@@ -52,6 +52,9 @@ public class Valeur {
                 break;
             case "J":
                 setValeur(J);
+                break;
+            case "T":
+                setValeur(T);
                 break;
             default:
                 throw new IllegalArgumentException("Valeur inexistante (string)");
@@ -91,6 +94,8 @@ public class Valeur {
             return "Q";
         case 11:
             return "J";
+        case 10:
+            return "T";
         default:
             return "" + valeur;
         }

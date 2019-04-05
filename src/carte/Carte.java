@@ -4,7 +4,7 @@ import carte.Enseigne.Couleur;
 import paquet.Paquet;
 
 public class Carte {
-    
+
     private Enseigne enseigne;
     private Valeur valeur;
 
@@ -13,11 +13,33 @@ public class Carte {
         setValeur(v);
     }
 
+    public Carte(String s) {
+        setValeur(new Valeur(s.substring(0, 1)));
+        switch (s.charAt(1)) {
+        case 's':
+            setEnseigne(Enseigne.Pique);
+            break;
+        case 'h':
+            setEnseigne(Enseigne.Coeur);
+            break;
+        case 'd':
+            setEnseigne(Enseigne.Carreau);
+            break;
+        case 'c':
+            setEnseigne(Enseigne.Trefle);
+            break;
+        default:
+            break;
+        }
+        setEnseigne(enseigne);
+    }
+
     public Carte(Paquet deck) {
         Carte c = deck.piocher();
         setEnseigne(c.getEnseigne());
         setValeur(c.getValeur());
     }
+
     /**
      * @return the couleur
      */
@@ -28,7 +50,7 @@ public class Carte {
     /**
      * @param enseigne the couleur to set
      */
-    public void setEnseigne(Enseigne enseigne) {
+    private void setEnseigne(Enseigne enseigne) {
         this.enseigne = enseigne;
     }
 
@@ -39,11 +61,10 @@ public class Carte {
         return valeur;
     }
 
-
     /**
      * @param valeur the valeur to set
      */
-    public void setValeur(Valeur valeur) {
+    private void setValeur(Valeur valeur) {
         this.valeur = valeur;
     }
 
@@ -67,12 +88,13 @@ public class Carte {
     }
 
     public String toString() {
-        return "" + enseigne.toString() + valeur.toString();
+        return valeur.toString() + enseigne.toString();
     }
 
     public boolean EstNoir() {
         return enseigne.getCouleur() == Couleur.Noir;
     }
+
     public boolean EstRouge() {
         return enseigne.getCouleur() == Couleur.Rouge;
     }
