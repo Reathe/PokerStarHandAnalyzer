@@ -7,7 +7,13 @@ public class Joueur {
     private String nom;
     private Main main;
     private int stack;
+    private int seat;
 
+    public Joueur(String n, int stack, int seat) {
+        setNom(n);
+        setStack(stack);
+        setSeat(seat);
+    }
     public Joueur(String n, int stack) {
         setNom(n);
         setStack(stack);
@@ -102,5 +108,19 @@ public class Joueur {
 
     public void subToStack(int s) {
         setStack(stack - s);
+    }
+
+    /**
+     * @return the seat
+     */
+    public int getSeat() {
+        return seat;
+    }
+
+    /**
+     * @param seat the seat to set
+     */
+    public void setSeat(int seat) {
+        this.seat = seat;
     }
 }

@@ -16,11 +16,11 @@ public class ReadFile {
 	public static final String TABLE = "Table '.*' [0-9]-max \\(.*\\) Seat #[0-9] is the button";
 	public static final String JOUEUR = "Seat [0-9]: .* \\([0-9]+ in .*\\) .*";
 	public static final String BLINDS = ".*: posts (small|big) blind [0-9]+";
-
+	//TODO: Finir de read le fichier.
 	public static void main(String[] args) throws Exception {
 		File folder = new File("C:\\Users\\bacho\\AppData\\Local\\PokerStars.FR\\HandHistory\\Reathe");
 		for (PokerSHand h : FolderToListHand(folder)) {
-			System.out.println(h.toString());
+			System.out.println("-------------------------------------------------------------------------------------------------------------------------------\n"+h.toString());
 		}
 	}
 
@@ -50,13 +50,20 @@ public class ReadFile {
 			Table t = StringToTable(lines[i]);
 			i++;
 			while (lines[i].matches(JOUEUR)) {
-				t.addJoueur(Integer.parseInt("" + lines[i].charAt(5)), StringToJoueur(lines[i]));
+				t.addJoueur(StringToJoueur(lines[i]));
 				i++;
 			}
 			pkh.setTable(t);
 		} else
 			throw new IllegalArgumentException("Premiere ligne ne match pas");
 
+		while (lines[i].matches(BLINDS)) {
+			String name = lines[i].substring(0, lines[i].indexOf(':'));
+			Joueur j = pkh.getTable().getJoueur(name);
+			Action a = stringToBlind(lines[i]);
+			pkh.addAPreFlop(a, j);
+			i++;
+		}
 		return pkh;
 	}
 
@@ -86,7 +93,8 @@ public class ReadFile {
 		String[] mots = s.split(" ");
 		String nom = mots[2];
 		int stack = Integer.parseInt(mots[3].substring(1));
-		return new Joueur(nom, stack);
+		int seat = Integer.parseInt("" + s.charAt(5));
+		return new Joueur(nom, stack,seat);
 	}
 
 	public static String readFile(String path) {

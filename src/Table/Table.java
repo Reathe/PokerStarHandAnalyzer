@@ -1,11 +1,14 @@
 package Table;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import Joueur.Joueur;
 
 public class Table {
 
     private String nom;
-    private Joueur[] seats = new Joueur[9];
+    private Hashtable<String, Joueur> seats = new Hashtable<String, Joueur>();
     private int button;
 
     public Table(String n, int button) {
@@ -13,19 +16,31 @@ public class Table {
         setButton(button);
     }
 
-    public void addJoueur(int i, Joueur j) {
-        seats[i] = j;
+    public void addJoueur(int seatNumber, Joueur j) {
+        j.setSeat(seatNumber);
+        addJoueur(j);
     }
-
+    public void addJoueur(Joueur j) {
+        getSeats().put(j.getNom(), j);
+    }
     /**
      * @return the seats
      */
-    public Joueur[] getSeats() {
+    public Hashtable<String, Joueur> getSeats() {
         return seats;
     }
 
     public Joueur getJoueur(int seat) {
-        return seats[seat];
+        for (Enumeration<Joueur> e = seats.elements(); e.hasMoreElements();) {
+            Joueur j = e.nextElement();
+            if (j.getSeat() == seat)
+                return j;
+        }
+        return null;
+    }
+
+    public Joueur getJoueur(String name) {
+        return getSeats().get(name);
     }
 
     /**
@@ -83,12 +98,10 @@ public class Table {
     @Override
     public String toString() {
         String s = "Table[" + getNom() + ",Bouton seat #" + getButton() + "\nJoueurs:\n";
-        int i = 1;
-        for (Joueur j : seats) {
-            if (j != null) {
-                s += "-" + j.toString() + " seat #" + i + "\n";
-            }
-            i++;
+
+        for (Enumeration<Joueur> e = seats.elements(); e.hasMoreElements();) {
+            Joueur j = e.nextElement();
+            s += "-" + j.toString() + " seat #" + j.getSeat() + "\n";
         }
         s += "]";
         return s;
