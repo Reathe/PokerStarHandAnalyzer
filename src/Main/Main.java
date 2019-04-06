@@ -1,4 +1,4 @@
-package Main;
+package main;
 
 import carte.Carte;
 import paquet.Paquet;
@@ -15,6 +15,7 @@ public class Main {
         setC1(c1);
         setC2(c2);
     }
+
     public Main(String s) {
         String[] subs = s.split(" ");
         setC1(new Carte(subs[0]));
@@ -50,7 +51,7 @@ public class Main {
     }
 
     public String toString() {
-        return "["+c1.toString() + " " + c2.toString()+"]";
+        return "[" + c1.toString() + " " + c2.toString() + "]";
     }
 
     public boolean unRouge() {

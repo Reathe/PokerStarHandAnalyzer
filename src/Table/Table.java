@@ -1,9 +1,9 @@
-package Table;
+package table;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import Joueur.Joueur;
+import joueur.Joueur;
 
 public class Table {
 
@@ -16,13 +16,10 @@ public class Table {
         setButton(button);
     }
 
-    public void addJoueur(int seatNumber, Joueur j) {
-        j.setSeat(seatNumber);
-        addJoueur(j);
-    }
     public void addJoueur(Joueur j) {
         getSeats().put(j.getNom(), j);
     }
+
     /**
      * @return the seats
      */
@@ -99,6 +96,10 @@ public class Table {
     public String toString() {
         String s = "Table[" + getNom() + ",Bouton seat #" + getButton() + "\nJoueurs:\n";
 
+        for (Enumeration<Joueur> e = seats.elements(); e.hasMoreElements();) {
+            Joueur j = e.nextElement();
+            s += "-" + j.toString() + " seat #" + j.getSeat() + "\n";
+        }
         for (Enumeration<Joueur> e = seats.elements(); e.hasMoreElements();) {
             Joueur j = e.nextElement();
             s += "-" + j.toString() + " seat #" + j.getSeat() + "\n";

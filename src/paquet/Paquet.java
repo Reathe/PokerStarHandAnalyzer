@@ -52,6 +52,7 @@ public class Paquet {
         removeCarte(tiree);
         return tiree;
     }
+
     public Carte regarderCarte() {
         int alea = (int) (Math.random() * jeu.size());
         Carte tiree = jeu.get(alea);

@@ -1,19 +1,53 @@
 package app;
 
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Properties;
+
+import joueur.Joueur;
+import pokershand.PokerSHand;
+import pokershand.ReadFile;
+
 public class App {
+    /**
+     *
+     */
 
-    public static final String MAIN = "^PokerStars Hand #[0-9]+:  .*[(][0-9]+/[0-9]+[)] - [0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} .{3} [[][0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .+]$";
-	public static final String TABLE = "^Table '.*' [0-9]-max [(].*[)] Seat #[0-9] is the button$";
+    private static final String LIGNE = "---------------------------------------------------------------------------------------------------\n\n";
 
-	public static void main(String[] args) throws Exception {
-		StringATable("Table 'Algorab III' 9-max (Play Money) Seat #2 is the button");
-	}
+    public static void main(String[] args) throws Exception {
+        File folder = new File("C:\\Users\\bacho\\AppData\\Local\\PokerStars.FR\\HandHistory\\Reathe");
 
-	public static void StringATable(String s) {
-		if (!s.matches(TABLE))
-            throw new IllegalArgumentException("Table non valide");
+        ArrayList<PokerSHand> PlayedHands = ReadFile.FolderToListHand(folder);
+        Joueur j = new Joueur(3);
 
-        System.out.println(s.substring(s.indexOf('\'')+1, s.lastIndexOf('\'')));
-        System.out.println(Integer.parseInt("" + s.charAt(1+s.indexOf('#'))));
-	}
+        Connection DB = getConnection();
+        ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
+        for (PokerSHand h : PlayedHands) {
+            System.out.println(LIGNE + h.toString());
+        }
+    }
+
+    public static Connection getConnection() throws SQLException {
+        String userName = "root";
+        String password = "Maman123789";
+        String dbms = "mysql";
+        String serverName = "localhost";
+        String portNumber = "3306";
+        String dbName = "PokerDB";
+        Connection conn = null;
+        Properties connectionProps = new Properties();
+        connectionProps.put("user", userName);
+        connectionProps.put("password", password);
+
+        if (dbms.equals("mysql")) {
+            conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName,
+                    connectionProps);
+        }
+        System.out.println("Connected to database");
+        return conn;
+    }
 }

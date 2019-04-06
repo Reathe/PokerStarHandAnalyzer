@@ -6,8 +6,7 @@ public enum Enseigne {
         Rouge, Noir;
     }
 
-    public static final Enseigne[] lesEnseignes = new Enseigne[] { Enseigne.Pique, Enseigne.Trefle, Enseigne.Carreau,
-            Enseigne.Coeur };
+    public static final Enseigne[] lesEnseignes = new Enseigne[] { Pique, Trefle, Carreau, Coeur };
 
     private Couleur couleur;
     static {

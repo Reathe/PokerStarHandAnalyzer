@@ -1,8 +1,8 @@
-package Partie;
+package partie;
 
 import java.util.ArrayList;
 
-import Joueur.Joueur;
+import joueur.Joueur;
 import paquet.Paquet;
 
 public class Partie {
@@ -80,12 +80,14 @@ public class Partie {
     public void resetPot() {
         setPot(0);
     }
+
     public void addToPot(int s) {
         if (s <= 0) {
             throw new IllegalArgumentException();
         }
-        setPot(pot+s);
+        setPot(pot + s);
     }
+
     /**
      * @param pot the pot to set
      */

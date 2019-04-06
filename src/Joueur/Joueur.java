@@ -1,26 +1,29 @@
-package Joueur;
+package joueur;
 
-import Main.Main;
+import actions.Action;
 import carte.Carte;
+import main.Main;
 
 public class Joueur {
     private String nom;
     private Main main;
     private int stack;
     private int seat;
+    private int mise = 0;
 
     public Joueur(String n, int stack, int seat) {
         setNom(n);
         setStack(stack);
         setSeat(seat);
     }
+
     public Joueur(String n, int stack) {
         setNom(n);
         setStack(stack);
     }
 
     public Joueur(int stack) {
-        setNom("John DOE");
+        setNom("Reathe");
         setStack(stack);
     }
 
@@ -40,32 +43,6 @@ public class Joueur {
         if (nom.equals(""))
             throw new IllegalArgumentException("Nom vide...");
         this.nom = nom;
-    }
-
-    public String toString() {
-        String s = "";
-        s += "Joueur[nom=" + getNom() + ",Stack = " + getStack();
-        if(main!=null)
-            s += ",hand=" + getMain().toString();
-        s += "]";
-        return s;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Joueur other = (Joueur) obj;
-        if (nom == null) {
-            if (other.nom != null)
-                return false;
-        } else if (!nom.equals(other.nom))
-            return false;
-        return true;
     }
 
     /**
@@ -122,5 +99,74 @@ public class Joueur {
      */
     public void setSeat(int seat) {
         this.seat = seat;
+    }
+
+    /**
+     * @return the mise
+     */
+    public int getMise() {
+        return mise;
+    }
+
+    public void Fais(Action a) {
+        setMise(a.getValeurMise() + getMise());
+    }
+
+    public void addToMise(int mise) {
+        setMise(mise + getMise());
+    }
+
+    /**
+     * @param mise the mise to set
+     */
+    private void setMise(int mise) {
+        this.mise = mise;
+    }
+
+    public String toString() {
+        String s = "";
+        s += "Joueur[nom=" + getNom() + ",Stack = " + getStack();
+        if (main != null)
+            s += ",hand=" + getMain().toString();
+        s += ",Mise=" + getMise();
+        s += "]";
+        return s;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((main == null) ? 0 : main.hashCode());
+        result = prime * result + ((nom == null) ? 0 : nom.hashCode());
+        result = prime * result + seat;
+        result = prime * result + stack;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Joueur other = (Joueur) obj;
+        if (main == null) {
+            if (other.main != null)
+                return false;
+        } else if (!main.equals(other.main))
+            return false;
+        if (nom == null) {
+            if (other.nom != null)
+                return false;
+        } else if (!nom.equals(other.nom))
+            return false;
+        if (seat != other.seat)
+            return false;
+        if (stack != other.stack)
+            return false;
+        return true;
     }
 }

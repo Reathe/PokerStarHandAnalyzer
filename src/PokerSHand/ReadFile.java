@@ -1,4 +1,4 @@
-package PokerSHand;
+package pokershand;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,30 +6,37 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import Actions.Action;
-import Actions.ActionName;
-import Joueur.Joueur;
-import Main.Main;
-import Table.Table;
+import actions.Action;
+import actions.Blind;
+import actions.Call;
+import actions.Check;
+import actions.Fold;
+import actions.Raise;
+import joueur.Joueur;
+import main.Main;
+import table.Table;
 
 public class ReadFile {
-	public static final String MESSAGE = ".* said, \\\".*\\\"";
-	public static final String CARD = "[TJQKA][schd]";
-	public static final String MAIN = ".*PokerStars Hand #[0-9]+:  .*\\([0-9]+/[0-9]+\\) - [0-9]{4}\\/[0-9]{2}\\/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .{3} \\[[0-9]{4}\\/[0-9]{2}\\/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .+\\].*";
+
+	public static final String MESSAGE = ".*(.*was removed from the table.*|is (dis)?connected.*|.*has timed out.*|.* said, \\\".*\\\"|.* collected .*|.* doesn't show hand.*|.* leaves the table.*|.* joins the table at.*).*";
+	public static final String CARD = "[TJQKA1-9][schd]";
+	public static final String MAIN = ".*PokerStars Hand #[0-9]{12}:  .*\\([0-9]+/[0-9]+\\) - [0-9]{4}\\/[0-9]{2}\\/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .{3} \\[[0-9]{4}\\/[0-9]{2}\\/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .+\\].*";
 	public static final String TABLE = "Table '.*' [0-9]-max \\(.*\\) Seat #[0-9] is the button";
-	public static final String JOUEUR = "Seat [0-9]: .* \\([0-9]+ in .*\\) .*";
+	public static final String JOUEUR = "Seat [0-9]: .* \\([0-9]+ in .*\\).*";
 	public static final String BLINDS = ".*: posts (small|big|small & big) blinds? [0-9]+";
 	public static final String FLOP = "\\*\\*\\* FLOP \\*\\*\\* \\[" + CARD + " " + CARD + " " + CARD + "\\]";
 	public static final String TURN = "\\*\\*\\* TURN \\*\\*\\* \\[" + CARD + " " + CARD + " " + CARD + "\\] \\[" + CARD
 			+ "\\]";
 	public static final String RIVER = "\\*\\*\\* RIVER \\*\\*\\* \\[" + CARD + " " + CARD + " " + CARD + " " + CARD
 			+ "\\] \\[" + CARD + "\\]";
+	public static final String SHOWDOWN = "\\*\\*\\* SHOW DOWN \\*\\*\\*";
+	public static final String SUMMARY = "\\*\\*\\* SUMMARY \\*\\*\\*";
 	public static final String CHECK = ".*: checks ";
-	public static final String FOLD = ".*: folds ";
-	public static final String BET = ".*: bets [0-9]+";
-	public static final String CALL = ".*: calls [0-9]+";
+	public static final String FOLD = ".*: folds (\\[" + CARD + "\\])?";
+	public static final String RAISE = ".*: (bets|raises [0-9]+ to) [0-9]+.*";
+	public static final String CALL = ".*: calls [0-9]+.*";
+	public static final String UNCALLED_BET = "Uncalled bet \\([0-9]+\\) returned to .*";
 
-	// TODO: Finir de read le fichier.
 	public static void main(String[] args) throws Exception {
 		File folder = new File("C:\\Users\\bacho\\AppData\\Local\\PokerStars.FR\\HandHistory\\Reathe");
 		for (PokerSHand h : FolderToListHand(folder)) {
@@ -55,40 +62,51 @@ public class ReadFile {
 	}
 
 	public static PokerSHand StringToPokerHand(String s) {
-		PokerSHand pkh = new PokerSHand();
 		String[] lines;
 		lines = s.split("\r\n");
 		int i = 0;
 		boolean match = lines[i].matches(MAIN);
 		if (!match)
 			throw new IllegalArgumentException("Premiere ligne ne match pas");
-
+		String TableNum = lines[0].split(" ")[2].replace("#", "").replace(":", "");
+		PokerSHand pkh = new PokerSHand(Long.parseLong(TableNum));
 		i++;
 		Table t = StringToTable(lines[i]);
 		i++;
+
 		while (lines[i].matches(JOUEUR)) {
-			t.addJoueur(StringToJoueur(lines[i]));
+			try {
+				t.addJoueur(StringToJoueur(lines[i]));
+			} catch (EspaceDansNomException e) {
+				s = s.replaceAll(e.getNom(), e.getReplacement());
+				lines = s.split("\r\n");
+				try {
+					t.addJoueur(StringToJoueur(lines[i]));
+				} catch (EspaceDansNomException ex) {
+					throw new IllegalArgumentException("Trop d'espaces dans le nom d'un joueur");
+				}
+			}
 			i++;
 		}
 		pkh.setTable(t);
-
+		i = skipMessages(lines, i, pkh.getTable());
 		while (lines[i].matches(BLINDS)) {
-			String name = lines[i].substring(0, lines[i].indexOf(':'));
-			Joueur j = pkh.getTable().getJoueur(name);
+			Joueur j = StringToJoueurInPkh(pkh, lines[i]);
 			Action a = stringToBlind(lines[i]);
 			pkh.addAPreFlop(a, j);
 			i++;
+			i = skipMessages(lines, i, pkh.getTable());
 		}
 		i++;
-		StringSetMainToJoueur(pkh, lines, i);
-		return pkh;
-	}
+		// i = skipMessages(lines, i,pkh.getTable());
+		StringSetMainToJoueur(pkh, lines[i]);
+		i++;
+		i = AddActionsPreFlop(pkh, lines, i);
+		i = AddActionsFlop(pkh, lines, i);
+		i = AddActionsTurn(pkh, lines, i);
+		i = AddActionsRiver(pkh, lines, i);
 
-	private static void StringSetMainToJoueur(PokerSHand pkh, String[] lines, int i) {
-		String[] split = lines[i].split(" ");
-		Joueur j = pkh.getTable().getJoueur(split[2]);
-		Main m = new Main(split[3].substring(1) + " " + split[4].substring(0, 2));
-		j.setMain(m);
+		return pkh;
 	}
 
 	/**
@@ -96,25 +114,138 @@ public class ReadFile {
 	 * dans @param pkh au moment @param moment retourne la ligne à laquelle on
 	 * s'arrete
 	 */
-	private static int AddActions(PokerSHand pkh, String[] lines, int i, String moment) {
-		i = skipMessages(lines, i);
+	private static int AddActionsPreFlop(PokerSHand pkh, String[] lines, int i) {
+		i = skipMessages(lines, i, pkh.getTable());
 
-		while (lines[i].matches(moment)) {
-			String name = lines[i].substring(0, lines[i].indexOf(':'));
-			Joueur j = pkh.getTable().getJoueur(name);
-			// Action a = stringtoMoment(lines[i]);
-			// pkh.addAPreFlop(a, j);
+		while (!lines[i].matches(FLOP) && !lines[i].matches(SUMMARY)) {
+			Joueur j;
+			Action a;
+			try {
+				j = StringToJoueurInPkh(pkh, lines[i]);
+				a = stringToAction(lines[i]);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				throw new IllegalArgumentException("PreFlop");
+			}
+			j.Fais(a);
+			pkh.addAPreFlop(a, j);
 			i++;
-			i = skipMessages(lines, i);
+			i = skipMessages(lines, i, pkh.getTable());
 		}
-
+		if (!lines[i].matches(SUMMARY))
+			i++;
 		return i;
 	}
 
-	private static int skipMessages(String[] lines, int i) {
-		while (lines[i].matches(MESSAGE))
+	private static int AddActionsFlop(PokerSHand pkh, String[] lines, int i) {
+		i = skipMessages(lines, i, pkh.getTable());
+
+		while (!lines[i].matches(TURN) && !lines[i].matches(SUMMARY)) {
+			Joueur j;
+			Action a;
+			try {
+				j = StringToJoueurInPkh(pkh, lines[i]);
+				a = stringToAction(lines[i]);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				throw new IllegalArgumentException("Flop");
+			}
+			j.Fais(a);
+			pkh.addAFlop(a, j);
+			i++;
+			i = skipMessages(lines, i, pkh.getTable());
+		}
+		if (!lines[i].matches(SUMMARY))
 			i++;
 		return i;
+	}
+
+	private static int AddActionsTurn(PokerSHand pkh, String[] lines, int i) {
+		i = skipMessages(lines, i, pkh.getTable());
+
+		while (!lines[i].matches(RIVER) && !lines[i].matches(SUMMARY)) {
+			Joueur j;
+			Action a;
+			try {
+				j = StringToJoueurInPkh(pkh, lines[i]);
+				a = stringToAction(lines[i]);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				throw new IllegalArgumentException("Turn");
+			}
+			j.Fais(a);
+			pkh.addATurn(a, j);
+			i++;
+			i = skipMessages(lines, i, pkh.getTable());
+		}
+		if (!lines[i].matches(SUMMARY))
+			i++;
+		return i;
+	}
+
+	private static int AddActionsRiver(PokerSHand pkh, String[] lines, int i) {
+		i = skipMessages(lines, i, pkh.getTable());
+
+		while (!lines[i].matches(SHOWDOWN) && !lines[i].matches(SUMMARY)) {
+			Joueur j;
+			Action a;
+			try {
+				j = StringToJoueurInPkh(pkh, lines[i]);
+				a = stringToAction(lines[i]);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				System.out.println("i=" + i + "\nline[i]=\"" + lines[i] + "\"");
+				throw new IllegalArgumentException("In River");
+			}
+			j.Fais(a);
+			pkh.addARiver(a, j);
+			i++;
+			i = skipMessages(lines, i, pkh.getTable());
+		}
+		if (!lines[i].matches(SUMMARY))
+			i++;
+		return i;
+	}
+
+	/**
+	 * 
+	 * @param pkh
+	 * @param lines
+	 * @param i     s sous forme 'Dealt to Reathe [As 9d]'
+	 */
+	private static void StringSetMainToJoueur(PokerSHand pkh, String s) {
+		String[] split = s.split(" ");
+		Joueur j = pkh.getTable().getJoueur(split[2]);
+		Main m;
+		try {
+			m = new Main(split[3].substring(1) + " " + split[4].substring(0, 2));
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+			System.out.println(s);
+			throw e;
+		}
+		j.setMain(m);
+	}
+
+	public static Action stringToAction(String s) {
+		if (s.matches(FOLD)) {
+			return new Fold();
+		} else if (s.matches(CHECK)) {
+			return new Check();
+		} else if (s.matches(RAISE)) {
+			String[] somme = s.split(" ");
+			int byAmmount = Integer.parseInt(somme[2]);
+			int toAmmount = byAmmount;
+			if (!somme[1].equals("bets"))
+				toAmmount = Integer.parseInt(somme[4]);
+
+			return new Raise(byAmmount, toAmmount);
+		} else if (s.matches(CALL)) {
+			String[] mots = s.split(" ");
+			int ammount = Integer.parseInt(mots[2]);
+			return new Call(ammount);
+		} else
+			throw new IllegalArgumentException("Action non valide");
 	}
 
 	public static Table StringToTable(String s) {
@@ -133,18 +264,45 @@ public class ReadFile {
 	public static Action stringToBlind(String s) {
 		String[] strs = s.split(" ");
 		int chips = Integer.parseInt(strs[strs.length - 1]);
-
-		return new Action(ActionName.Blinds, chips);
+		return new Blind(chips);
 	}
 
-	public static Joueur StringToJoueur(String s) {
+	public static Joueur StringToJoueur(String s) throws EspaceDansNomException {
 		if (!s.matches(JOUEUR))
 			throw new IllegalArgumentException("Joueur invalide");
 		String[] mots = s.split(" ");
+		if (mots.length == 7) {
+			throw new EspaceDansNomException("Espace dans le nom", mots[2] + " " + mots[3], mots[2] + mots[3]);
+		} else if (mots.length > 7) {
+			throw new EspaceDansNomException("Espace dans nom", mots[2] + " " + mots[3] + " " + mots[4],
+					mots[2] + mots[3] + mots[4]);
+		}
 		String nom = mots[2];
 		int stack = Integer.parseInt(mots[3].substring(1));
 		int seat = Integer.parseInt("" + s.charAt(5));
 		return new Joueur(nom, stack, seat);
+	}
+
+	private static Joueur StringToJoueurInPkh(PokerSHand pkh, String line) throws IllegalArgumentException {
+		if (line.indexOf(':') <= 0)
+			throw new IllegalArgumentException("line not valid");
+		String name = line.substring(0, line.indexOf(':'));
+		Joueur j = pkh.getTable().getJoueur(name);
+		return j;
+	}
+
+	private static int skipMessages(String[] lines, int i, Table t) {
+		while (lines[i].matches(MESSAGE))
+			i++;
+		if (lines[i].matches(UNCALLED_BET)) {
+			String[] line = lines[i].split(" ");
+			int ammount = Integer.parseInt(EnleverParentheses(line[2]));
+			String name = line[line.length - 1];
+			t.getJoueur(name).addToMise(ammount);
+			i = skipMessages(lines, i + 1, t);
+		}
+
+		return i;
 	}
 
 	public static String readFile(String path) {
@@ -155,5 +313,9 @@ public class ReadFile {
 			e.printStackTrace();
 		}
 		return new String(encoded);
+	}
+
+	private static String EnleverParentheses(String line) {
+		return line.replaceAll("(\\(|\\))", "");
 	}
 }

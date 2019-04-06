@@ -27,7 +27,7 @@ public class Valeur {
      * @param valeur the valeur to set
      */
     private void setValeur(int valeur) {
-        if (valeur <= A && valeur > 1)
+        if (valeur <= A && valeur >= 1)
             this.valeur = valeur;
         else
             throw new IllegalArgumentException("Valeur inexistante (int)");
@@ -65,9 +65,11 @@ public class Valeur {
     public boolean gt(Valeur v) {
         return this.valeur > v.valeur;
     }
+
     public boolean lt(Valeur v) {
         return this.valeur < v.valeur;
     }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

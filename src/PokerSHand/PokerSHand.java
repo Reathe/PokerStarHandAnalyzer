@@ -1,14 +1,15 @@
-package PokerSHand;
+package pokershand;
 
 import java.util.ArrayList;
 
-import Actions.Action;
-import Joueur.Joueur;
-import Table.Table;
+import actions.Action;
+import joueur.Joueur;
+import table.Table;
 
 public class PokerSHand {
     private Table table;
-
+    private long num;
+    private int pot = 0;
     private ArrayList<Joueur> jPreFlop = new ArrayList<Joueur>();
     private ArrayList<Action> aPreFlop = new ArrayList<Action>();
 
@@ -21,8 +22,8 @@ public class PokerSHand {
     private ArrayList<Joueur> jRiver = new ArrayList<Joueur>();
     private ArrayList<Action> aRiver = new ArrayList<Action>();
 
-    public PokerSHand() {
-
+    public PokerSHand(long num) {
+        setNum(num);
     }
 
     public ArrayList<Joueur> getJRiver() {
@@ -107,9 +108,10 @@ public class PokerSHand {
 
     @Override
     public String toString() {
-        String s = getTable().toString() + "\n*** PRE-FLOP ***";
+        String s = "Hand #" + getNum() + "\n" + getTable().toString() + "\n*** PRE-FLOP ***";
         for (int i = 0; i < jPreFlop.size(); i++) {
-            s += "\n" + jPreFlop.get(i).toString() + " " + aPreFlop.get(i).toString();
+            s += "\n" + jPreFlop.get(i).toString() + " ";
+            s += aPreFlop.get(i).toString();
         }
         s += "\n*** FLOP ***\n";
         for (int i = 0; i < jFlop.size(); i++) {
@@ -141,5 +143,145 @@ public class PokerSHand {
         } else if (!table.equals(other.table))
             return false;
         return true;
+    }
+
+    /**
+     * @return the num
+     */
+    public long getNum() {
+        return num;
+    }
+
+    /**
+     * @param num the num to set
+     */
+    private void setNum(long num) {
+        this.num = num;
+    }
+
+    /**
+     * @return the jPreFlop
+     */
+    public ArrayList<Joueur> getjPreFlop() {
+        return jPreFlop;
+    }
+
+    /**
+     * @param jPreFlop the jPreFlop to set
+     */
+    public void setjPreFlop(ArrayList<Joueur> jPreFlop) {
+        this.jPreFlop = jPreFlop;
+    }
+
+    /**
+     * @return the aPreFlop
+     */
+    public ArrayList<Action> getaPreFlop() {
+        return aPreFlop;
+    }
+
+    /**
+     * @param aPreFlop the aPreFlop to set
+     */
+    public void setaPreFlop(ArrayList<Action> aPreFlop) {
+        this.aPreFlop = aPreFlop;
+    }
+
+    /**
+     * @return the jFlop
+     */
+    public ArrayList<Joueur> getjFlop() {
+        return jFlop;
+    }
+
+    /**
+     * @param jFlop the jFlop to set
+     */
+    public void setjFlop(ArrayList<Joueur> jFlop) {
+        this.jFlop = jFlop;
+    }
+
+    /**
+     * @return the aFlop
+     */
+    public ArrayList<Action> getaFlop() {
+        return aFlop;
+    }
+
+    /**
+     * @param aFlop the aFlop to set
+     */
+    public void setaFlop(ArrayList<Action> aFlop) {
+        this.aFlop = aFlop;
+    }
+
+    /**
+     * @return the jTurn
+     */
+    public ArrayList<Joueur> getjTurn() {
+        return jTurn;
+    }
+
+    /**
+     * @param jTurn the jTurn to set
+     */
+    public void setjTurn(ArrayList<Joueur> jTurn) {
+        this.jTurn = jTurn;
+    }
+
+    /**
+     * @return the aTurn
+     */
+    public ArrayList<Action> getaTurn() {
+        return aTurn;
+    }
+
+    /**
+     * @param aTurn the aTurn to set
+     */
+    public void setaTurn(ArrayList<Action> aTurn) {
+        this.aTurn = aTurn;
+    }
+
+    /**
+     * @return the jRiver
+     */
+    public ArrayList<Joueur> getjRiver() {
+        return jRiver;
+    }
+
+    /**
+     * @param jRiver the jRiver to set
+     */
+    public void setjRiver(ArrayList<Joueur> jRiver) {
+        this.jRiver = jRiver;
+    }
+
+    /**
+     * @return the aRiver
+     */
+    public ArrayList<Action> getaRiver() {
+        return aRiver;
+    }
+
+    /**
+     * @param aRiver the aRiver to set
+     */
+    public void setaRiver(ArrayList<Action> aRiver) {
+        this.aRiver = aRiver;
+    }
+
+    /**
+     * @return the pot
+     */
+    public int getPot() {
+        return pot;
+    }
+
+    /**
+     * @param pot the pot to set
+     */
+    public void setPot(int pot) {
+        this.pot = pot;
     }
 }
