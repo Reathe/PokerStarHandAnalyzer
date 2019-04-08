@@ -20,7 +20,8 @@ public class App {
      *
      */
 
-    private static final String LIGNE = "---------------------------------------------------------------------------------------------------\n\n";
+    // private static final String LIGNE =
+    // "---------------------------------------------------------------------------------------------------\n\n";
 
     public static void main(String[] args) throws Exception {
         File folder = new File("C:\\Users\\bacho\\AppData\\Local\\PokerStars.FR\\HandHistory\\Reathe");
@@ -44,17 +45,17 @@ public class App {
         }
     }
 
-    private static long ResetTime() {
+    public static long ResetTime() {
         long startTime;
         startTime = System.nanoTime();
         return startTime;
     }
 
-    private static void PrintTimeSince(long startTime, String ToDoMethod) {
+    public static void PrintTimeSince(long startTime, String ToDoMethod) {
         System.out.printf("%.1f ms" + ToDoMethod, (System.nanoTime() - startTime) / 1000000.0);
     }
 
-    private static void PrintNomInJoueur(Statement statement) throws SQLException {
+    public static void PrintNomInJoueur(Statement statement) throws SQLException {
         ResultSet res = statement.executeQuery("SELECT nom FROM Joueur");
         while (res.next()) {
             System.out.println(res.getString("nom"));
@@ -100,17 +101,17 @@ public class App {
     private static Hashtable<String, Joueur> GetPlayersIn(ArrayList<PokerSHand> PlayedHands) {
         Hashtable<String, Joueur> joueurs = new Hashtable<String, Joueur>();
         for (PokerSHand h : PlayedHands) {
-            //System.out.println(LIGNE + h.toString());
+            // System.out.println(LIGNE + h.toString());
             joueurs.putAll(h.getTable().getSeats());
         }
         return joueurs;
     }
 
     private static void InsertPokerHand(PokerSHand hand, Statement statement) {
-        String pokershandNum = ""+hand.getNum();
+        String pokershandNum = "" + hand.getNum();
         String cartes = hand.boardToString();
-        String command = "INSERT IGNORE INTO `PokerSHand` (num,CartesTable) " + "VALUES ('"
-                + pokershandNum + "','" + cartes + "')";
+        String command = "INSERT IGNORE INTO `PokerSHand` (num,CartesTable) " + "VALUES ('" + pokershandNum + "','"
+                + cartes + "')";
 
         try {
             statement.executeUpdate(command);
@@ -124,47 +125,42 @@ public class App {
             }
         }
     }
+
     private static void InsertJouerForPlayedHands(ArrayList<PokerSHand> PlayedHands, Statement statement) {
         for (PokerSHand hand : PlayedHands) {
-            
+
             InsertJouerForHand(hand, statement);
         }
     }
 
-    private static void InsertJouerForHand(PokerSHand pkh,Statement statement) {
-        for (Enumeration<Joueur> e = pkh.getTable().getSeats().elements();e.hasMoreElements();) {
+    private static void InsertJouerForHand(PokerSHand pkh, Statement statement) {
+        for (Enumeration<Joueur> e = pkh.getTable().getSeats().elements(); e.hasMoreElements();) {
             Joueur j = e.nextElement();
             InsertJouerInDB(j, pkh.getNum(), statement);
         }
     }
+
     private static void InsertJouerInDB(Joueur j, long pokershandNum, Statement statement) {
-        String nom = j.getNom().replaceAll("'", "\\\\'");;
+        String nom = j.getNom().replaceAll("'", "\\\\'");
         int mise = j.getMise();
         String main = "NULL";
-        String suited = "NULL";
-        if (j.getMain()!=null){
-            main = "'" +j.getMain().toString()+ "'";
-            if (j.getMain().isSuited())
-                suited = "'1'";
-            else
-                suited = "'0'";
-        }
-        
+        if (j.getMain() != null)
+            main = "'" + j.getMain().toString() + "'";
+
         String pos = "NULL";
-        if (j.getPos()!=null)
-            pos = "'" +j.getPos()+"'";
+        if (j.getPos() != null)
+            pos = "'" + j.getPos() + "'";
         j.getPos();
 
         String action = j.getAction();
         int gagne = j.getGagne();
-        String command = "INSERT IGNORE INTO `Jouer` (PokerSHand_num,Joueur_nom,Mise,Main,Pos,Action,Gagne) " + "VALUES ('"
-                + pokershandNum + "','" + nom + "','" + mise + "'," + main + "," + pos + ",'"
-                + action + "','" + gagne + "')";
+        String command = "INSERT IGNORE INTO `Jouer` (PokerSHand_num,Joueur_nom,Mise,Main,Pos,Action,Gagne) "
+                + "VALUES ('" + pokershandNum + "','" + nom + "','" + mise + "'," + main + "," + pos + ",'" + action
+                + "','" + gagne + "')";
 
         try {
             statement.executeUpdate(command);
         } catch (Exception e) {
-            // TODO: handle exception
             System.out.println(e.getMessage());
         }
     }
@@ -186,7 +182,7 @@ public class App {
         Properties connectionProps = new Properties();
         connectionProps.put("user", userName);
         connectionProps.put("password", password);
-
+        
         conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName,
                 connectionProps);
 

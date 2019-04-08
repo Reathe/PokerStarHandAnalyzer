@@ -53,6 +53,7 @@ public class Main {
     public boolean isSuited() {
         return getC1().getEnseigne() == getC2().getEnseigne();
     }
+
     public String toString() {
         return "[" + c1.toString() + " " + c2.toString() + "]";
     }

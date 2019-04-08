@@ -12,7 +12,7 @@ public class PokerSHand {
     private long num;
     private int pot = 0;
     private ArrayList<Carte> board = new ArrayList<Carte>();
-    
+
     /**
      * bad way to do it
      */
@@ -120,6 +120,7 @@ public class PokerSHand {
         s += "]";
         return s;
     }
+
     @Override
     public String toString() {
         String s = "Hand #" + getNum() + "\n" + getTable().toString() + "\n*** PRE-FLOP ***";

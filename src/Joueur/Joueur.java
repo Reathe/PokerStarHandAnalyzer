@@ -128,11 +128,11 @@ public class Joueur {
 
     public String toString() {
         String s = "";
-        s += "Joueur[nom=" + getNom() + ",pos = "+getPos()+ ",stack = " + getStack();
+        s += "Joueur[nom=" + getNom() + ",pos = " + getPos() + ",stack = " + getStack();
         if (main != null)
             s += ",hand=" + getMain().toString();
         s += ",Mise=" + getMise();
-        s+= ","+getAction();
+        s += "," + getAction();
 
         s += "]";
         return s;

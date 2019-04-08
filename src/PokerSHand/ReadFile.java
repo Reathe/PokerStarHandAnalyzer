@@ -101,7 +101,7 @@ public class ReadFile {
 			i = skipMessages(lines, i, pkh.getTable());
 		}
 		i++;
-		i = skipMessages(lines, i,pkh.getTable());
+		i = skipMessages(lines, i, pkh.getTable());
 		StringSetMainToJoueur(pkh, lines[i]);
 		i++;
 		i = AddActionsPreFlop(pkh, lines, i);
@@ -284,7 +284,7 @@ public class ReadFile {
 			m = new Main(words[i].substring(1) + " " + words[i + 1].substring(0, 2));
 			j.setMain(m);
 			i += 3;
-			if (words[i-4].equals("showed") && words[i].equals("won")) {
+			if (words[i - 4].equals("showed") && words[i].equals("won")) {
 				i++;
 				j.setGagne(Integer.parseInt(EnleverParentheses(words[i])));
 			}

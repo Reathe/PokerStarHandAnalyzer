@@ -22,16 +22,16 @@ public enum Enseigne {
 
     @Override
     public String toString() {
-        switch (this){
-            case Pique:
+        switch (this) {
+        case Pique:
             return "s";
-            case Coeur:
+        case Coeur:
             return "h";
-            case Carreau:
+        case Carreau:
             return "d";
-            case Trefle:
+        case Trefle:
             return "c";
-            default:
+        default:
             return "";
         }
     }
