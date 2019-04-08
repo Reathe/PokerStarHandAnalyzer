@@ -3,6 +3,7 @@ package pokershand;
 import java.util.ArrayList;
 
 import actions.Action;
+import carte.Carte;
 import joueur.Joueur;
 import table.Table;
 
@@ -10,6 +11,11 @@ public class PokerSHand {
     private Table table;
     private long num;
     private int pot = 0;
+    private ArrayList<Carte> board = new ArrayList<Carte>();
+    
+    /**
+     * bad way to do it
+     */
     private ArrayList<Joueur> jPreFlop = new ArrayList<Joueur>();
     private ArrayList<Action> aPreFlop = new ArrayList<Action>();
 
@@ -106,6 +112,14 @@ public class PokerSHand {
         return result;
     }
 
+    public String boardToString() {
+        String s = "[ ";
+        for (Carte c : getBoard()) {
+            s += c.toString() + " ";
+        }
+        s += "]";
+        return s;
+    }
     @Override
     public String toString() {
         String s = "Hand #" + getNum() + "\n" + getTable().toString() + "\n*** PRE-FLOP ***";
@@ -269,6 +283,17 @@ public class PokerSHand {
      */
     public void setaRiver(ArrayList<Action> aRiver) {
         this.aRiver = aRiver;
+    }
+
+    /**
+     * @return the board
+     */
+    public ArrayList<Carte> getBoard() {
+        return board;
+    }
+
+    public void addToBoard(Carte c) {
+        getBoard().add(c);
     }
 
     /**

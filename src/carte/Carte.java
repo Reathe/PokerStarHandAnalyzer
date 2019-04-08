@@ -41,7 +41,7 @@ public class Carte {
     }
 
     /**
-     * @return the couleur
+     * @return the enseigne (Coeur,Pique,Carreau,Trefle)
      */
     public Enseigne getEnseigne() {
         return enseigne;

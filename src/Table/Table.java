@@ -77,17 +77,10 @@ public class Table {
         if (getClass() != obj.getClass())
             return false;
         Table other = (Table) obj;
-        if (button != other.button)
-            return false;
         if (nom == null) {
             if (other.nom != null)
                 return false;
         } else if (!nom.equals(other.nom))
-            return false;
-        if (seats == null) {
-            if (other.seats != null)
-                return false;
-        } else if (!seats.equals(other.seats))
             return false;
         return true;
     }
@@ -100,10 +93,7 @@ public class Table {
             Joueur j = e.nextElement();
             s += "-" + j.toString() + " seat #" + j.getSeat() + "\n";
         }
-        for (Enumeration<Joueur> e = seats.elements(); e.hasMoreElements();) {
-            Joueur j = e.nextElement();
-            s += "-" + j.toString() + " seat #" + j.getSeat() + "\n";
-        }
+
         s += "]";
         return s;
     }

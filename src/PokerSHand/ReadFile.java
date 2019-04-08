@@ -12,13 +12,14 @@ import actions.Call;
 import actions.Check;
 import actions.Fold;
 import actions.Raise;
+import carte.Carte;
 import joueur.Joueur;
 import main.Main;
 import table.Table;
 
 public class ReadFile {
 
-	public static final String MESSAGE = ".*(.*was removed from the table.*|is (dis)?connected.*|.*has timed out.*|.* said, \\\".*\\\"|.* collected .*|.* doesn't show hand.*|.* leaves the table.*|.* joins the table at.*).*";
+	public static final String MESSAGE = ".*(.*was removed from the table.*|is (dis)?connected.*|.*has timed out.*|.* said, \\\".*\\\"|.* collected .*|.* doesn't show hand.*|.* leaves the table.*|.* joins the table at.*|.*is sitting out.*|.*will be allowed to play.*).*";
 	public static final String CARD = "[TJQKA1-9][schd]";
 	public static final String MAIN = ".*PokerStars Hand #[0-9]{12}:  .*\\([0-9]+/[0-9]+\\) - [0-9]{4}\\/[0-9]{2}\\/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .{3} \\[[0-9]{4}\\/[0-9]{2}\\/[0-9]{2} [0-9]+:[0-9]+:[0-9]+ .+\\].*";
 	public static final String TABLE = "Table '.*' [0-9]-max \\(.*\\) Seat #[0-9] is the button";
@@ -93,19 +94,41 @@ public class ReadFile {
 		while (lines[i].matches(BLINDS)) {
 			Joueur j = StringToJoueurInPkh(pkh, lines[i]);
 			Action a = stringToBlind(lines[i]);
+			String[] str = lines[i].split(" ");
+			j.addToMise(Integer.parseInt(str[str.length - 1]));
 			pkh.addAPreFlop(a, j);
 			i++;
 			i = skipMessages(lines, i, pkh.getTable());
 		}
 		i++;
-		// i = skipMessages(lines, i,pkh.getTable());
+		i = skipMessages(lines, i,pkh.getTable());
 		StringSetMainToJoueur(pkh, lines[i]);
 		i++;
 		i = AddActionsPreFlop(pkh, lines, i);
 		i = AddActionsFlop(pkh, lines, i);
 		i = AddActionsTurn(pkh, lines, i);
 		i = AddActionsRiver(pkh, lines, i);
+		i = ToSummary(lines, i);
+		// On est à SUMMARY
+		i += 2;
+		// A board si il y est
+		if (lines[i].matches("Board.*")) {
+			String[] cartes = lines[i].replaceAll("(Board \\[|\\])", "").split(" ");
+			for (String carte : cartes) {
+				try {
+					pkh.addToBoard(new Carte(carte));
+				} catch (Exception e) {
+					System.out.println(e.toString());
 
+				}
+			}
+			i++;
+		}
+		// Au recap par joueurs
+		while (i < lines.length && lines[i].matches("Seat [0-9]:.*")) {
+			StringSetMainToJoueurInSummary(pkh, lines[i]);
+			i++;
+		}
 		return pkh;
 	}
 
@@ -132,8 +155,10 @@ public class ReadFile {
 			i++;
 			i = skipMessages(lines, i, pkh.getTable());
 		}
-		if (!lines[i].matches(SUMMARY))
+		if (!lines[i].matches(SUMMARY)) {
 			i++;
+		}
+
 		return i;
 	}
 
@@ -211,7 +236,8 @@ public class ReadFile {
 	 * 
 	 * @param pkh
 	 * @param lines
-	 * @param i     s sous forme 'Dealt to Reathe [As 9d]'
+	 * @param i     s sous forme 'Dealt to nomJoueur [CarteEnseigne CarteEnseigne]'
+	 *              'Dealt to Reathe [As 9d]'
 	 */
 	private static void StringSetMainToJoueur(PokerSHand pkh, String s) {
 		String[] split = s.split(" ");
@@ -225,6 +251,44 @@ public class ReadFile {
 			throw e;
 		}
 		j.setMain(m);
+	}
+
+	/**
+	 * returns the "position|Action"
+	 * 
+	 * @param pkh
+	 * @param s
+	 * @return
+	 */
+	private static void StringSetMainToJoueurInSummary(PokerSHand pkh, String s) {
+		String[] words = s.split(" ");
+		int i = 2;
+		Joueur j = pkh.getTable().getJoueur(words[i]);
+		Main m = null;
+
+		i++;
+		// On est à la pos si existe on passe
+		if (words[i].charAt(0) == '(') {
+			j.setPos(EnleverParentheses(words[i]));
+			i++;
+			if (words[i].endsWith(")"))
+				i++;
+		}
+		// On est à l'action
+		j.setAction(words[i]);
+		if (words[i].equals("collected")) {
+			i++;
+			j.setGagne(Integer.parseInt(EnleverParentheses(words[i])));
+		} else if (words[i].equals("mucked") | words[i].equals("showed")) {
+			i++;
+			m = new Main(words[i].substring(1) + " " + words[i + 1].substring(0, 2));
+			j.setMain(m);
+			i += 3;
+			if (words[i-4].equals("showed") && words[i].equals("won")) {
+				i++;
+				j.setGagne(Integer.parseInt(EnleverParentheses(words[i])));
+			}
+		}
 	}
 
 	public static Action stringToAction(String s) {
@@ -302,6 +366,12 @@ public class ReadFile {
 			i = skipMessages(lines, i + 1, t);
 		}
 
+		return i;
+	}
+
+	public static int ToSummary(String[] lines, int i) {
+		while (i < lines.length && !lines[i].matches(SUMMARY))
+			i++;
 		return i;
 	}
 

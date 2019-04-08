@@ -22,7 +22,18 @@ public enum Enseigne {
 
     @Override
     public String toString() {
-        return super.toString();
+        switch (this){
+            case Pique:
+            return "s";
+            case Coeur:
+            return "h";
+            case Carreau:
+            return "d";
+            case Trefle:
+            return "c";
+            default:
+            return "";
+        }
     }
 
     public boolean equals(Enseigne e) {

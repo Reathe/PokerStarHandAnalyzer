@@ -37,7 +37,7 @@ public class Main {
     }
 
     /**
-     * @return the c2
+     * @return the second card
      */
     public Carte getC2() {
         return c2;
@@ -50,6 +50,9 @@ public class Main {
         this.c2 = c2;
     }
 
+    public boolean isSuited() {
+        return getC1().getEnseigne() == getC2().getEnseigne();
+    }
     public String toString() {
         return "[" + c1.toString() + " " + c2.toString() + "]";
     }

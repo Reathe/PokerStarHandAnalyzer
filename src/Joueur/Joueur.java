@@ -10,6 +10,9 @@ public class Joueur {
     private int stack;
     private int seat;
     private int mise = 0;
+    private int gagne = 0;
+    private String pos;
+    private String action;
 
     public Joueur(String n, int stack, int seat) {
         setNom(n);
@@ -125,10 +128,12 @@ public class Joueur {
 
     public String toString() {
         String s = "";
-        s += "Joueur[nom=" + getNom() + ",Stack = " + getStack();
+        s += "Joueur[nom=" + getNom() + ",pos = "+getPos()+ ",stack = " + getStack();
         if (main != null)
             s += ",hand=" + getMain().toString();
         s += ",Mise=" + getMise();
+        s+= ","+getAction();
+
         s += "]";
         return s;
     }
@@ -168,5 +173,47 @@ public class Joueur {
         if (stack != other.stack)
             return false;
         return true;
+    }
+
+    /**
+     * @return the gagne
+     */
+    public int getGagne() {
+        return gagne;
+    }
+
+    /**
+     * @param gagne the gagne to set
+     */
+    public void setGagne(int gagne) {
+        this.gagne = gagne;
+    }
+
+    /**
+     * @return the pos
+     */
+    public String getPos() {
+        return pos;
+    }
+
+    /**
+     * @param pos the pos to set
+     */
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+
+    /**
+     * @return the action
+     */
+    public String getAction() {
+        return action;
+    }
+
+    /**
+     * @param action the action to set
+     */
+    public void setAction(String action) {
+        this.action = action;
     }
 }

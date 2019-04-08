@@ -3,8 +3,12 @@ package app;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import joueur.Joueur;
@@ -22,15 +26,155 @@ public class App {
         File folder = new File("C:\\Users\\bacho\\AppData\\Local\\PokerStars.FR\\HandHistory\\Reathe");
 
         ArrayList<PokerSHand> PlayedHands = ReadFile.FolderToListHand(folder);
-        Joueur j = new Joueur(3);
 
-        Connection DB = getConnection();
-        ArrayList<Joueur> joueurs = new ArrayList<Joueur>();
-        for (PokerSHand h : PlayedHands) {
-            System.out.println(LIGNE + h.toString());
+        Connection DataBase = getConnection();
+        Statement statement = DataBase.createStatement();
+
+        Hashtable<String, Joueur> joueurs = GetPlayersIn(PlayedHands);
+        InsertHandsInDB(PlayedHands, statement);
+        InsertPlayersIntoDB(joueurs, statement);
+        InsertJouerForPlayedHands(PlayedHands, statement);
+        // PrintNomInJoueur(statement);
+        DataBase.close();
+    }
+
+    private static void InsertHandsInDB(ArrayList<PokerSHand> PlayedHands, Statement statement) {
+        for (PokerSHand hand : PlayedHands) {
+            InsertPokerHand(hand, statement);
         }
     }
 
+    private static long ResetTime() {
+        long startTime;
+        startTime = System.nanoTime();
+        return startTime;
+    }
+
+    private static void PrintTimeSince(long startTime, String ToDoMethod) {
+        System.out.printf("%.1f ms" + ToDoMethod, (System.nanoTime() - startTime) / 1000000.0);
+    }
+
+    private static void PrintNomInJoueur(Statement statement) throws SQLException {
+        ResultSet res = statement.executeQuery("SELECT nom FROM Joueur");
+        while (res.next()) {
+            System.out.println(res.getString("nom"));
+        }
+    }
+
+    /**
+     * Insert each joueur of joueurs into the database using statement
+     * 
+     * @param joueurs   the joueurs to insert
+     * @param statement the statement to use
+     */
+    private static void InsertPlayersIntoDB(Hashtable<String, Joueur> joueurs, Statement statement) {
+        int errcode;
+        String j;
+        String command;
+        /**
+         * For each key (names) in joueurs Inserts it in the db using the statement
+         */
+        for (Enumeration<Joueur> e = joueurs.elements(); e.hasMoreElements();) {
+            // to stop errors caused by ' in names
+            j = e.nextElement().getNom().replaceAll("'", "\\\\'");
+
+            command = "INSERT IGNORE INTO `Joueur` (nom) " + "VALUES ('" + j + "')";
+            try {
+                statement.executeUpdate(command);
+            } catch (SQLException ex) {
+                errcode = ex.getErrorCode();
+
+                // If the error is not duplicate key error
+                if (errcode != 1062) {
+                    System.out.println(ex.getMessage() + "\n" + command);
+                    throw new IllegalArgumentException();
+                }
+            }
+        }
+    }
+
+    /**
+     * @param PlayedHands
+     * @return players who played in any of the PlayedHands
+     */
+    private static Hashtable<String, Joueur> GetPlayersIn(ArrayList<PokerSHand> PlayedHands) {
+        Hashtable<String, Joueur> joueurs = new Hashtable<String, Joueur>();
+        for (PokerSHand h : PlayedHands) {
+            //System.out.println(LIGNE + h.toString());
+            joueurs.putAll(h.getTable().getSeats());
+        }
+        return joueurs;
+    }
+
+    private static void InsertPokerHand(PokerSHand hand, Statement statement) {
+        String pokershandNum = ""+hand.getNum();
+        String cartes = hand.boardToString();
+        String command = "INSERT IGNORE INTO `PokerSHand` (num,CartesTable) " + "VALUES ('"
+                + pokershandNum + "','" + cartes + "')";
+
+        try {
+            statement.executeUpdate(command);
+        } catch (Exception e) {
+            int errcode = ((SQLException) e).getErrorCode();
+
+            // If the error is not duplicate key error
+            if (errcode != 1062) {
+                System.out.println(e.getMessage() + "\n" + command);
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+    private static void InsertJouerForPlayedHands(ArrayList<PokerSHand> PlayedHands, Statement statement) {
+        for (PokerSHand hand : PlayedHands) {
+            
+            InsertJouerForHand(hand, statement);
+        }
+    }
+
+    private static void InsertJouerForHand(PokerSHand pkh,Statement statement) {
+        for (Enumeration<Joueur> e = pkh.getTable().getSeats().elements();e.hasMoreElements();) {
+            Joueur j = e.nextElement();
+            InsertJouerInDB(j, pkh.getNum(), statement);
+        }
+    }
+    private static void InsertJouerInDB(Joueur j, long pokershandNum, Statement statement) {
+        String nom = j.getNom().replaceAll("'", "\\\\'");;
+        int mise = j.getMise();
+        String main = "NULL";
+        String suited = "NULL";
+        if (j.getMain()!=null){
+            main = "'" +j.getMain().toString()+ "'";
+            if (j.getMain().isSuited())
+                suited = "'1'";
+            else
+                suited = "'0'";
+        }
+        
+        String pos = "NULL";
+        if (j.getPos()!=null)
+            pos = "'" +j.getPos()+"'";
+        j.getPos();
+
+        String action = j.getAction();
+        int gagne = j.getGagne();
+        String command = "INSERT IGNORE INTO `Jouer` (PokerSHand_num,Joueur_nom,Mise,Main,Pos,Action,Gagne) " + "VALUES ('"
+                + pokershandNum + "','" + nom + "','" + mise + "'," + main + "," + pos + ",'"
+                + action + "','" + gagne + "')";
+
+        try {
+            statement.executeUpdate(command);
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * returns the connextion to the PokerDB
+     * 
+     * @return
+     * @throws SQLException
+     */
     public static Connection getConnection() throws SQLException {
         String userName = "root";
         String password = "Maman123789";
@@ -43,11 +187,10 @@ public class App {
         connectionProps.put("user", userName);
         connectionProps.put("password", password);
 
-        if (dbms.equals("mysql")) {
-            conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName,
-                    connectionProps);
-        }
-        System.out.println("Connected to database");
+        conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName,
+                connectionProps);
+
+        // System.out.println("Connected to database");
         return conn;
     }
 }
