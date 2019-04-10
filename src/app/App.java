@@ -110,8 +110,9 @@ public class App {
     private static void InsertPokerHand(PokerSHand hand, Statement statement) {
         String pokershandNum = "" + hand.getNum();
         String cartes = hand.boardToString();
-        String command = "INSERT IGNORE INTO `PokerSHand` (num,CartesTable) " + "VALUES ('" + pokershandNum + "','"
-                + cartes + "')";
+        String date = hand.getD();
+        String command = "INSERT IGNORE INTO `PokerSHand` (num,CartesTable,LaDate) " + "VALUES ('" + pokershandNum + "','"
+                + cartes + "','"+ date + "')";
 
         try {
             statement.executeUpdate(command);
@@ -182,11 +183,11 @@ public class App {
         Properties connectionProps = new Properties();
         connectionProps.put("user", userName);
         connectionProps.put("password", password);
-        
+
         conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName,
                 connectionProps);
 
-        // System.out.println("Connected to database");
+
         return conn;
     }
 }

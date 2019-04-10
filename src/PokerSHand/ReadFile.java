@@ -69,8 +69,14 @@ public class ReadFile {
 		boolean match = lines[i].matches(MAIN);
 		if (!match)
 			throw new IllegalArgumentException("Premiere ligne ne match pas");
-		String TableNum = lines[0].split(" ")[2].replace("#", "").replace(":", "");
+		String TableNum = lines[0].split(" ")[2].replaceAll("[#:]", "");
+		String[] dateTime = lines[0].split("-")[1].split(" ");
+		String date = dateTime[1].replaceAll("/", "-");
+		String time = dateTime[2];
+		if (dateTime[1].length() == 7)
+			time = "0" + time;
 		PokerSHand pkh = new PokerSHand(Long.parseLong(TableNum));
+		pkh.setD(date + " " + time);
 		i++;
 		Table t = StringToTable(lines[i]);
 		i++;
@@ -273,6 +279,10 @@ public class ReadFile {
 			i++;
 			if (words[i].endsWith(")"))
 				i++;
+			else if (words[i].startsWith("(")) {
+				j.setPos(j.getPos() + " & " + EnleverParentheses(words[i]));
+				i+=2;
+			}
 		}
 		// On est à l'action
 		j.setAction(words[i]);
@@ -362,7 +372,7 @@ public class ReadFile {
 			String[] line = lines[i].split(" ");
 			int ammount = Integer.parseInt(EnleverParentheses(line[2]));
 			String name = line[line.length - 1];
-			t.getJoueur(name).addToMise(ammount);
+			t.getJoueur(name).addToMise(-ammount);
 			i = skipMessages(lines, i + 1, t);
 		}
 

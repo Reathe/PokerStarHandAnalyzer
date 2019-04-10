@@ -28,6 +28,8 @@ public class PokerSHand {
     private ArrayList<Joueur> jRiver = new ArrayList<Joueur>();
     private ArrayList<Action> aRiver = new ArrayList<Action>();
 
+    private String d;
+
     public PokerSHand(long num) {
         setNum(num);
     }
@@ -309,5 +311,26 @@ public class PokerSHand {
      */
     public void setPot(int pot) {
         this.pot = pot;
+    }
+
+    /**
+     * @param board the board to set
+     */
+    public void setBoard(ArrayList<Carte> board) {
+        this.board = board;
+    }
+
+    /**
+     * @return the d
+     */
+    public String getD() {
+        return d;
+    }
+
+    /**
+     * @param d the d to set
+     */
+    public void setD(String d) {
+        this.d = d;
     }
 }
