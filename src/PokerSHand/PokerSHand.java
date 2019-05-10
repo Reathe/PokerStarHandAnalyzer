@@ -28,7 +28,7 @@ public class PokerSHand {
     private ArrayList<Joueur> jRiver = new ArrayList<Joueur>();
     private ArrayList<Action> aRiver = new ArrayList<Action>();
 
-    private String d;
+    private String date;
 
     public PokerSHand(long num) {
         setNum(num);
@@ -324,13 +324,13 @@ public class PokerSHand {
      * @return the d
      */
     public String getD() {
-        return d;
+        return date;
     }
 
     /**
      * @param d the d to set
      */
     public void setD(String d) {
-        this.d = d;
+        this.date = d;
     }
 }

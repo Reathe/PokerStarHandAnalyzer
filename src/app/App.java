@@ -84,10 +84,9 @@ public class App {
                 statement.executeUpdate(command);
             } catch (SQLException ex) {
                 errcode = ex.getErrorCode();
-
+                System.out.println(ex.getMessage() + "\n" + command);
                 // If the error is not duplicate key error
                 if (errcode != 1062) {
-                    System.out.println(ex.getMessage() + "\n" + command);
                     throw new IllegalArgumentException();
                 }
             }
@@ -118,10 +117,9 @@ public class App {
             statement.executeUpdate(command);
         } catch (Exception e) {
             int errcode = ((SQLException) e).getErrorCode();
-
+            System.out.println(e.getMessage() + "\n" + command);
             // If the error is not duplicate key error
             if (errcode != 1062) {
-                System.out.println(e.getMessage() + "\n" + command);
                 throw new IllegalArgumentException();
             }
         }
@@ -184,9 +182,8 @@ public class App {
         connectionProps.put("user", userName);
         connectionProps.put("password", password);
 
-        conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName,
+        conn = DriverManager.getConnection("jdbc:" + dbms + "://" + serverName + ":" + portNumber + "/" + dbName + "?serverTimezone=UTC",
                 connectionProps);
-
 
         return conn;
     }
