@@ -37,6 +37,7 @@ public class ReadFile {
 	public static final String RAISE = ".*: (bets|raises [0-9]+ to) [0-9]+.*";
 	public static final String CALL = ".*: calls [0-9]+.*";
 	public static final String UNCALLED_BET = "Uncalled bet \\([0-9]+\\) returned to .*";
+	public static final String SHOWS = ".*: shows \\[" + CARD + "( " + CARD + ")\\].*";
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File("C:\\Users\\bacho\\AppData\\Local\\PokerStars.FR\\HandHistory\\Reathe");
@@ -49,10 +50,12 @@ public class ReadFile {
 
 	public static ArrayList<PokerSHand> FolderToListHand(File folder) {
 		ArrayList<PokerSHand> hands = new ArrayList<PokerSHand>();
-
+		if (folder.listFiles().length == 0) {
+			throw new IllegalArgumentException("Dossier Vide" + folder.getAbsolutePath());
+		}
 		for (File fileEntry : folder.listFiles()) {
 			if (fileEntry.isDirectory())
-				throw new IllegalArgumentException("Il y a un dossier dans le dossier.");
+				throw new IllegalArgumentException("Il y a un dossier dans le dossier." + folder.getAbsolutePath());
 
 			for (String s : readFile(fileEntry.getAbsolutePath()).split("\r\n\r\n\r\n\r\n")) {
 				hands.add(StringToPokerHand(s));
@@ -202,7 +205,7 @@ public class ReadFile {
 				a = stringToAction(lines[i]);
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
-				throw new IllegalArgumentException("Turn");
+				throw new IllegalArgumentException("Turn " + pkh.getNum() + " " + pkh.getD());
 			}
 			j.Fais(a);
 			pkh.addATurn(a, j);
@@ -281,7 +284,7 @@ public class ReadFile {
 				i++;
 			else if (words[i].startsWith("(")) {
 				j.setPos(j.getPos() + " & " + EnleverParentheses(words[i]));
-				i+=2;
+				i += 2;
 			}
 		}
 		// On est à l'action
@@ -368,14 +371,21 @@ public class ReadFile {
 	private static int skipMessages(String[] lines, int i, Table t) {
 		while (lines[i].matches(MESSAGE))
 			i++;
+
 		if (lines[i].matches(UNCALLED_BET)) {
 			String[] line = lines[i].split(" ");
 			int ammount = Integer.parseInt(EnleverParentheses(line[2]));
 			String name = line[line.length - 1];
 			t.getJoueur(name).addToMise(-ammount);
 			i = skipMessages(lines, i + 1, t);
+		} else if (lines[i].matches(SHOWS)) {
+			String[] line = lines[i].split(" ");
+			String name = line[0].replaceAll(":", "");
+			Main m = new Main(line[2].substring(1) + " " + line[3].substring(0, 2));
+			t.getJoueur(name).setMain(m);
+			i++;
 		}
-
+		
 		return i;
 	}
 
